@@ -5,7 +5,8 @@ const doGet = (e: GoogleAppsScript.Events.DoGet) => {
 
   const template = HtmlService.createTemplateFromFile('menu');
   template.data = JSON.stringify(data);
-  template.logo = settings.logo;
+  template.logo_light = settings.logo_light;
+  template.logo_dark = settings.logo_dark;
 
   return template
     .evaluate()
@@ -41,15 +42,23 @@ const getSettings = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
 
   const settings = {
     name: data[0][1],
-    logo: data[1][1],
-    currency: data[2][1],
+    logo_light: data[1][1],
+    logo_dark: data[2][1],
+    currency: data[3][1],
   };
 
-  if (String(settings.logo).includes('drive.google.com')) {
-    const fileId = String(settings.logo).split('/d/')[1].split('/')[0];
+  if (String(settings.logo_light).includes('drive.google.com')) {
+    const fileId = String(settings.logo_light).split('/d/')[1].split('/')[0];
     const blob = DriveApp.getFileById(fileId).getBlob();
     const base64 = Utilities.base64Encode(blob.getBytes());
-    settings.logo = `data:image/png;base64,${base64}`;
+    settings.logo_light = `data:image/png;base64,${base64}`;
+  }
+
+  if (String(settings.logo_dark).includes('drive.google.com')) {
+    const fileId = String(settings.logo_dark).split('/d/')[1].split('/')[0];
+    const blob = DriveApp.getFileById(fileId).getBlob();
+    const base64 = Utilities.base64Encode(blob.getBytes());
+    settings.logo_dark = `data:image/png;base64,${base64}`;
   }
 
   return settings;
