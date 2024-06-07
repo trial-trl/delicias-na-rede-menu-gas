@@ -45,7 +45,7 @@ const getSettings = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
     name: data[0][1],
     logo_light: data[1][1],
     logo_dark: data[2][1],
-    currency: data[3][1],
+    currency: data[3][1].split(','),
     order_now_actions: data[4][1],
   };
 
