@@ -156,6 +156,7 @@
     ></script>
     <script>
       const data = JSON.parse('<?= data ?>');
+      const translations = JSON.parse('<?= translations_obj ?>');
 
       const init = () => {
         $("#logo_light_img").attr('src', "<?= logo_light ?>");
@@ -180,6 +181,44 @@
           $category.append($option);
         });
       };
+
+      const createMenuItem = (item, options) => {
+        const { settings } = data;
+        const { id, name, price, image, category, description } = item;
+
+        const prefixPrice = (options ? options.prefixPrice : '') || '';
+        
+        const formattedPrice = new Intl.NumberFormat(settings.currency[0], {
+          style: 'currency',
+          currency: settings.currency[1]
+        }).format(price);
+        const isDescriptionLong = String(description).length > 80;
+        const formattedDescription = isDescriptionLong ? String(description).substring(0, 80) + '...' : String(description);
+        const $more = isDescriptionLong ? `<button class="text-xs text-gray-700 hover:text-gray-900" onclick="expandItem('${id}')">More</button>` : '';
+
+        return $(`
+          <li class="md:col-span-6 lg:col-span-4 h-full">
+            <div class="h-full flex items-stretch md:border-2 border-orange-500 md:rounded-md p-2 justify-between gap-x-6 py-3 bg-white dark:bg-gray-900 dark:border-gray-900">
+                <div class="flex-1">
+                  <p id="item_name${id}" class="text-base font-semibold leading-6 text-gray-800 dark:text-gray-200">${name}</p>
+                  <p id="item_price${id}" class="mt-1 truncate text-sm leading-5 text-green-600 font-medium">${prefixPrice}${formattedPrice}</p>
+                  <p id="item_description${id}" class="mt-1 overflow-hidden whitespace-normal text-xs leading-5 text-gray-500">${formattedDescription}${$more}</p>
+                </div>
+                <div>
+                  ${
+                    image &&
+                    `<img
+                        class="h-16 md:h-20 w-16 md:w-20 bg-gray-50 rounded-lg object-cover object-center"
+                        id="item_image${id}"
+                        src="${image}"
+                        alt="${name}"
+                      />`
+                  }
+                </div>
+            </div>
+          </li>
+        `);
+      }
 
       const setItems = () => {
         const $category = $('#category');
@@ -228,53 +267,39 @@
           $menu_items.append($category);
           $(`#cat_${i}`).text(category);
 
-          items.forEach((item, j) => {
+          items.filter(item => !item.isAdditional).forEach((item, j) => {
             const { id, name, price, image, category, description } = item;
-            const $item = $(`
-              <li class="md:col-span-6 lg:col-span-4 h-full">
-                <div class="h-full flex items-stretch md:border-2 border-orange-500 md:rounded-md p-2 justify-between gap-x-6 py-3 bg-white dark:bg-gray-900 dark:border-gray-900">
-                    <div class="flex-1">
-                      <p id="item_name${id}" class="text-base font-semibold leading-6 text-gray-800 dark:text-gray-200"></p>
-                      <p id="item_price${id}" class="mt-1 truncate text-sm leading-5 text-green-600 font-medium"></p>
-                      <p id="item_description${id}" class="mt-1 overflow-hidden whitespace-normal text-xs leading-5 text-gray-500"></p>
-                    </div>
-                    <div>
-                      ${
-                        image &&
-                        `<img
-                            class="h-16 md:h-20 w-16 md:w-20 bg-gray-50 rounded-lg object-cover object-center"
-                            id="item_image${id}"
-                          />`
-                      }
-                    </div>
-                </div>
-              </li>
-            `);
+            const $item = createMenuItem(item);
             $menu_items.append($item);
-            $(`#item_name${id}`).text(name);
-            $(`#item_price${id}`).text(
-              new Intl.NumberFormat(settings.currency[0], {
-                style: 'currency',
-                currency: settings.currency[1]
-              }).format(price)
-            );
-
-            $(`#item_image${id}`).attr('src', image);
-            $(`#item_image${id}`).attr('alt', name);
-
-            if (String(description).length > 80) {
-              $(`#item_description${id}`).text(
-                String(description).substring(0, 80) + '...'
-              );
-
-              const $more = $(
-                `<button class="text-xs text-gray-700 hover:text-gray-900" onclick="expandItem('${id}')">More</button>`
-              );
-              $(`#item_description${id}`).append($more);
-            } else {
-              $(`#item_description${id}`).text(String(description));
-            }
           });
+
+          const additionals = items.filter(item => item.isAdditional);
+
+          if (!additionals || additionals.length === 0) {
+            return;
+          }
+
+          const $additionals_wrapper = $(`<li class="col-start-4 col-span-12 space-y-4"></li>`);
+
+          $additionals_wrapper.append(
+            $(`<h3 id="cat_${i}_additional" class="sticky col-span-12 text-right text-lg font-medium leading-6 text-orange-600 dark:text-gray-100">${translations.additionalsLabel}</h3>`)
+          );
+
+          const $additionals_list = $(
+            $(`<ul role="list" class="divide-y md:divide-y-0 divide-gray-100 md:grid grid-cols-12 gap-3"></ul>`)
+          );
+
+          $additionals_wrapper.append($additionals_list);
+
+          additionals.forEach((item, j) => {
+            const { id, name, price, image, category, description } = item;
+            const $item = createMenuItem(item, {
+              prefixPrice: '+ '
+            });
+            $additionals_list.append($item);
+          });
+
+          $menu_items.append($additionals_wrapper);
         });
       };
 

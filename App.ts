@@ -10,6 +10,7 @@ const doGet = (e: GoogleAppsScript.Events.DoGet) => {
   template.logo_dark = settings.logo_dark;
   template.order_now_actions = isCompactView ? settings.order_now_actions_compact : settings.order_now_actions;
   template.translations = translations;
+  template.translations_obj = JSON.stringify(translations);
 
   return template
     .evaluate()
@@ -93,7 +94,7 @@ const getMenuItems = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
   const data = menu_sheet.getDataRange().getValues();
   const menu_items: any = [];
   for (let i = 1; i < data.length; i++) {
-    const [name, description, image, price, category] = data[i];
+    const [name, description, image, price, category, isAdditional] = data[i];
 
     if (!name) continue;
 
@@ -106,6 +107,7 @@ const getMenuItems = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
       image,
       price,
       category,
+      isAdditional,
     };
 
     if (String(image).includes('drive.google.com')) {
