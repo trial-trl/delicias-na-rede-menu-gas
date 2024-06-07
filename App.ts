@@ -1,13 +1,14 @@
 const doGet = (e: GoogleAppsScript.Events.DoGet) => {
   const data = getData();
   if (!data) return ContentService.createTextOutput('No data found');
-  const { settings } = data;
+  const { settings, translations } = data;
 
   const template = HtmlService.createTemplateFromFile('menu');
   template.data = JSON.stringify(data);
   template.logo_light = settings.logo_light;
   template.logo_dark = settings.logo_dark;
   template.order_now_actions = settings.order_now_actions;
+  template.translations = translations;
 
   return template
     .evaluate()
@@ -22,6 +23,9 @@ const getData = () => {
   const settings = getSettings(ss);
   if (!settings) return null;
 
+  const translations = getTranslations(ss);
+  if (!translations) return null;
+
   const categories = getCategories(ss);
 
   const menu_items = getMenuItems(ss);
@@ -29,6 +33,7 @@ const getData = () => {
 
   const data = {
     settings,
+    translations,
     categories,
     menu_items,
   };
@@ -64,6 +69,20 @@ const getSettings = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
   }
 
   return settings;
+};
+
+const getTranslations = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
+  const translations_sheet = ss.getSheetByName(SHEET_NAMES.TRANSLATIONS);
+  if (!translations_sheet) return null;
+  const data = translations_sheet.getDataRange().getValues();
+
+  var translations = {};
+
+  for (let i = 1; i < data.length; i++) {
+    translations[data[i][0]] = data[i][1];
+  }
+
+  return translations;
 };
 
 const getMenuItems = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
