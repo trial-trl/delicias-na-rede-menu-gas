@@ -142,6 +142,12 @@
           </li> -->
         </ul>
       </div>
+      <div id="order_now" class="container mx-auto grid grid-cols-12 fixed bottom-0 z-10 shadow-[0_-1px_13px_0_rgba(0,0,0,0.1),0_1px_2px_-1px_rgba(0,0,0,0.1)] bg-[#f7f1d7] dark:bg-[#ce6245] min-h-[80px]">
+        <div class="col-span-12 md:col-span-3 flex justify-center items-center">
+          <h3 id="cat_0" class="text-lg font-medium leading-6 text-orange-600 dark:text-gray-100">Pedir agora</h3>
+        </div>
+        <div id="order_now_actions" class="col-span-12 md:col-span-9 flex justify-center items-center"></div>
+      </div>
     </div>
     <script
       src="https://code.jquery.com/jquery-3.6.0.min.js"
@@ -154,6 +160,13 @@
       const init = () => {
         $("#logo_light_img").attr('src', "<?= logo_light ?>");
         $("#logo_dark_img").attr('src', "<?= logo_dark ?>");
+        var orderNowActions = "<?= order_now_actions ?>";
+        if (orderNowActions.length > 0) {
+          $("#order_now_actions").html(orderNowActions);
+          $("body").addClass("mb-24");
+        } else {
+          $("#order_now").hide();
+        }
         setCategory();
         setItems();
       };

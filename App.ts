@@ -7,6 +7,7 @@ const doGet = (e: GoogleAppsScript.Events.DoGet) => {
   template.data = JSON.stringify(data);
   template.logo_light = settings.logo_light;
   template.logo_dark = settings.logo_dark;
+  template.order_now_actions = settings.order_now_actions;
 
   return template
     .evaluate()
@@ -45,6 +46,7 @@ const getSettings = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
     logo_light: data[1][1],
     logo_dark: data[2][1],
     currency: data[3][1],
+    order_now_actions: data[4][1],
   };
 
   if (String(settings.logo_light).includes('drive.google.com')) {
