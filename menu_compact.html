@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Menu</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      ::-webkit-scrollbar {
+        width: 2px;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background-color: #888; /* Color of the thumb */
+        border-radius: 2px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background-color: #555; /* Color of the thumb on hover */
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #ce6245;
+          color: #fff;
+          background-image: url('https://deliciasnarede.com.br/menu/pattern-dark.svg');
+        }
+      }
+      @media (prefers-color-scheme: light) {
+        body {
+          background-color: #f7f1d7;
+          color: #d0400d;
+          background-image: url('https://deliciasnarede.com.br/menu/pattern-light.svg');
+        }
+        h1 {
+            color: #ff6640;
+        }
+      }
+    </style>
+  </head>
+  <body class="container mx-auto">
+    <div>
+      <div class="flex justify-center items-end space-x-12">
+        <img id="logo_light_img" src="<?= logo_light ?>" alt="" class="h-24 block dark:hidden" />
+        <img id="logo_dark_img" src="<?= logo_dark ?>" alt="" class="h-24 hidden dark:block" />
+        <div id="order_now_actions"></div>
+      </div>
+      <div class="my-2 h-0.5 bg-orange-600 dark:bg-white"></div>
+      <div class="divider divide-y-2 px-4 pb-10">
+        <ul
+          role="list"
+          id="menu_items"
+          class="md:grid grid-cols-12 gap-3"
+        ></ul>
+      </div>
+    </div>
+    <script
+      src="https://code.jquery.com/jquery-3.6.0.min.js"
+      integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+      crossorigin="anonymous"
+    ></script>
+    <script>
+      const data = JSON.parse('<?= data ?>');
+
+      const init = () => {
+        var orderNowActions = "<?= order_now_actions ?>";
+        if (orderNowActions.length > 0) {
+          $("#order_now_actions").html(orderNowActions);
+        }
+        setItems();
+      };
+
+      const setItems = () => {
+        const $menu_items = $('#menu_items');
+        $menu_items.empty();
+
+        const { categories, menu_items, settings } = data;
+
+        const category_list = categories;
+
+        const menu = {};
+
+        category_list.forEach((category) => {
+          menu_items.forEach((item) => {
+            const { name, price, image, category: item_category } = item;
+            if (category !== item_category) {
+              return;
+            }
+
+            if (!menu[category]) {
+              menu[category] = [item];
+            } else {
+              menu[category].push(item);
+            }
+          });
+        });
+
+        category_list.forEach((category, i) => {
+          const items = menu[category];
+          if (!items) {
+            return;
+          }
+
+          const $category = $(`<li class="pt-6 sticky col-span-12">
+                                 <h3 id="cat_${i}" class="text-lg font-medium leading-6 text-orange-600 dark:text-white"></h3>
+                               </li>`);
+          $menu_items.append($category);
+          $(`#cat_${i}`).text(category);
+
+          items.forEach((item, j) => {
+            const { id, name, price, image, category, description } = item;
+            const $item = $(`
+              <li class="col-span-12 h-full">
+                <div class="h-full flex items-stretch justify-between gap-x-6">
+                    <div class="flex space-x-2 max-w-[70%]">
+                      <p id="item_name${id}" class="text-base font-semibold leading-6 text-gray-800 dark:text-white break-words hyphens-auto"></p>
+                      <p id="item_description${id}" class="mt-1 overflow-hidden whitespace-normal text-xs leading-5 text-gray-500 dark:text-gray-300"></p>
+                    </div>
+                    <div class="flex-1 h-4 border-b-2 border-orange-600 border-dashed dark:border-white"></div>
+                    <div>
+                      <p id="item_price${id}" class="mt-1 truncate text-sm leading-5 text-green-600 font-medium dark:text-white"></p>
+                    </div>
+                </div>
+              </li>
+            `);
+            $menu_items.append($item);
+            $(`#item_name${id}`).text(name);
+            $(`#item_price${id}`).text(
+              new Intl.NumberFormat(settings.currency[0], {
+                style: 'currency',
+                currency: settings.currency[1]
+              }).format(price)
+            );
+
+            if (String(description).length > 80) {
+              $(`#item_description${id}`).text(
+                String(description).substring(0, 80) + '...'
+              );
+
+              const $more = $(
+                `<button class="text-xs text-gray-700 hover:text-gray-900" onclick="expandItem('${id}')">More</button>`
+              );
+              $(`#item_description${id}`).append($more);
+            } else {
+              $(`#item_description${id}`).text(String(description));
+            }
+          });
+        });
+      };
+
+      const expandItem = (id) => {
+        const { categories, menu_items } = data;
+        const item = menu_items.find((item) => item.id === id);
+        const { description } = item;
+        $(`#item_description${id}`).text(description);
+      };
+
+      init();
+    </script>
+  </body>
+</html>
