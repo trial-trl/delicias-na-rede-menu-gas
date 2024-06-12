@@ -8,6 +8,7 @@ const doGet = (e: GoogleAppsScript.Events.DoGet) => {
   template.data = JSON.stringify(data);
   template.logo_light = settings.logo_light;
   template.logo_dark = settings.logo_dark;
+  template.bg_image = settings.bg_image;
   template.order_now_actions = isCompactView ? settings.order_now_actions_compact : settings.order_now_actions;
   template.translations = translations;
   template.translations_obj = JSON.stringify(translations);
@@ -55,6 +56,7 @@ const getSettings = (ss: GoogleAppsScript.Spreadsheet.Spreadsheet) => {
     currency: data[3][1].split(','),
     order_now_actions: data[4][1],
     order_now_actions_compact: data[5][1],
+    bg_image: data[6][1],
   };
 
   if (String(settings.logo_light).includes('drive.google.com')) {
